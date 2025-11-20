@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container col-md-6 glass-card p-4 mx-auto">
+  <div class='d-flex align-items-start gap-4'>
+    <img src='{{user.avatar.url}}' alt="avatar" 
+    class="img-thumbnail", 
+    style='width: 150px; height: 150px; object-fit: cover;'>
+  
+    <div>
+      <p class='text-light fs-3 fw-bold'>{{ user.username }}</p>
+      <p class="text-light mb-1">{{user.first_name}}</p>
+      <p class="text-light mb-1">{{user.last_name}}</p>
+      <p class="text-light mb-1">{{user.bio}}</p>
+    </div>
+  </div>
+  <div class="row row-cols-3 mt-3">
+    <p class='text-light mb-1'>Posts</p>
+    <p class='text-light mb-1'>Followers</p>
+    <p class='text-light mb-1'>Following</p>
+    <p class='text-light mb-1'>0</p>
+    <p class='text-light mb-1'>{{user.followers}}</p>
+    <p class='text-light mb-1'>{{user.following}}</p>
+  </div>
+</div>
+{% endblock %}

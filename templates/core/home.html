@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Mico — Home{% endblock %}
+
+{% block styles %}
+<style>
+    .hero-title {
+        font-size: 3.4rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 0 25px #ffffff33;
+    }
+
+    .hero-sub {
+        color: #b5b5b5;
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .hero-btn {
+        padding: 0.8rem 2rem;
+        border-radius: 10px;
+        background: linear-gradient(145deg, #1a1a1a, #0b0b0b);
+        border: 1px solid #333;
+        color: #fff;
+        transition: 0.3s ease-in-out;
+    }
+
+    .hero-btn:hover {
+        background: linear-gradient(145deg, #222, #111);
+        transform: translateY(-3px);
+        box-shadow: 0 0 15px #fff3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section text-center">
+
+    <h1 class="hero-title mb-3">Welcome to Mico</h1>
+    <p class="hero-sub mb-4">
+        A modern dark-themed social network built by a Python developer from scratch.
+    </p>
+
+    {% if not request.user.is_authenticated %}
+    <div class="mt-4">
+        <a href="{% url 'users:register' %}" class="hero-btn me-2">Create Account</a>
+        <a href="{% url 'users:login' %}" class="hero-btn">Login</a>
+    </div>
+    {% endif %}
+    
+
+</section>
+
+<section class="container section">
+
+    <div class="glass-card text-center">
+        <h2 class="fw-bold mb-3">Developer Note</h2>
+        <p class="text-secondary">
+            This project is under active development.  
+            New features, pages and functionality are added every day.
+        </p>
+    </div>
+
+</section>
+{% endblock %}
