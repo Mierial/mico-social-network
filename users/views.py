@@ -5,7 +5,7 @@ from .forms import RegisterForm
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
-from .models import CustomUser
+from .models import CustomUser, Follow
 
 
 def login_view(request):
@@ -27,7 +27,8 @@ def register_view(request):
 
 def profile_view(request, pk):
     profile_user = CustomUser.objects.get(pk=pk)
-    return render(request, 'users/profile_view.html', {'profile_user': profile_user})
+    is_following = Follow.objects.filter(from_user=request.user, to_user=profile_user).exists()
+    return render(request, 'users/profile_view.html', {'profile_user': profile_user, 'is_following': is_following})
 
 def profile_settings(request):
     return render(request, 'users/edit_profile.html')
@@ -40,3 +41,9 @@ def logout_view(request):
     if request.method == "GET":
         logout(request)
         return redirect('home')
+    
+def following(request):
+    pass
+
+def unfollowing(request):
+    pass

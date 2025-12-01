@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container col-md-6 glass-card p-4 mx-auto">
+<div class="container col-md-6 glass-card p-4 mx-auto" style="position:relative;">
   <div class='d-flex align-items-start gap-4'>
     <img src='{{ profile_user.avatar.url }}' alt="avatar" 
     class="img-thumbnail", 
@@ -13,6 +13,7 @@
       <p class="text-light mb-1">{{profile_user.last_name}}</p>
       <p class="text-light mb-1">{{profile_user.bio}}</p>
     </div>
+    
   </div>
   <div class="row row-cols-3 mt-3">
     <p class='text-light mb-1'>Posts</p>
@@ -26,6 +27,12 @@
     <button type='submit' class="btn btn-danger mt-2">Вийти</button>
     {% endif %}
     </form>
+  </div>
+  <div style="position:absolute; right:18px; bottom:18px;">
+      <button type="button" class="btn-accent" style="padding:0.45rem 0.9rem;">Subscribe</button>
+    {% if is_following %}
+       <button type="button" class="btn-accent" style="padding:0.45rem 0.9rem;">Unfollow</button>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
