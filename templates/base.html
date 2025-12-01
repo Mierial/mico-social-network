@@ -113,16 +113,15 @@
 
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav ms-auto">
-
                 <a href="{% url 'users:members_list' %}">
-                    <i class="fa-solid fa-people-group" style="color: white; font-size: 32px; margin: 5px;"></i>
+                    <i class="bi bi-people" style="color: white; font-size: 32px; margin: 5px;"></i>
                 </a>
             {% if request.user.is_authenticated %}
             <a href="{% url 'users:profile_edit' %}">
                 <i class="bi bi-gear" style="color: white; font-size: 32px; margin: 5px;"></i>
             </a>
             
-            <a href="{% url 'users:profile' %}">
+            <a href="{% url 'users:profile' user.pk %}">
                 <i class="bi bi-person-circle" style="color: white; font-size: 32px;"></i>
             </a>
 

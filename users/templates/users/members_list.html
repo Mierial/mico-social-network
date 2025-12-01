@@ -1,3 +1,34 @@
 {% extends 'base.html' %}
-<div class="col-md-6">
-    {% for  %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="text-light mb-4">Members</h2>
+
+    <div class="card mb-3 bg-dark text-light border-secondary">
+        {% for user in users %}
+        <div class="row g-0 align-items-center">
+
+            <div class="col-auto p-3">
+                <img src="{{ user.avatar.url }}"
+                     class="rounded-circle"
+                     style="width:72px; height:72px; object-fit:cover;">
+            </div>
+
+            <div class="col">
+                <div class="card-body py-2">
+                    <h5 class="card-title mb-1">{{ user.username }}</h5>
+                    <p class="mb-0 text-secondary">{{ user.first_name }}</p>
+                    <p class="mb-0 small text-muted">{{user.email}}</p>
+                </div>
+            </div>
+            
+            <div class="col-auto pe-3">
+                <a href="{% url 'users:profile' user.pk %}" class="btn btn-outline-light btn-sm">View</a>
+            </div>
+            
+        </div>
+        {% endfor %} 
+    </div>
+</div>
+{% endblock %}
