@@ -28,7 +28,9 @@ def register_view(request):
 def profile_view(request, pk):
     profile_user = CustomUser.objects.get(pk=pk)
     is_following = Follow.objects.filter(from_user=request.user, to_user=profile_user).exists()
-    return render(request, 'users/profile_view.html', {'profile_user': profile_user, 'is_following': is_following})
+    followers_count = Follow.objects.filter(to_user=profile_user).count()
+    following_count = Follow.objects.filter(from_user=profile_user).count()
+    return render(request, 'users/profile_view.html', {'profile_user': profile_user, 'is_following': is_following, 'followers_count': followers_count, 'following_count': following_count})
 
 def profile_settings(request):
     return render(request, 'users/edit_profile.html')
@@ -42,8 +44,14 @@ def logout_view(request):
         logout(request)
         return redirect('home')
     
-def following(request):
-    pass
+def following(request, pk):
+    profile_user = CustomUser.objects.get(pk=pk)
+    if(request.method == 'POST'):
+        Follow.objects.create(from_user=request.user, to_user=profile_user)
+    return redirect('users:profile', pk=pk)
 
-def unfollowing(request):
-    pass
+def unfollowing(request, pk):
+    profile_user = CustomUser.objects.get(pk=pk)
+    if(request.method=='POST'):
+        Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
+    return redirect('users:profile', pk=pk)

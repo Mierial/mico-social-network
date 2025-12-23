@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import profile_view, register_view, login_view, profile_settings, members_list_view, logout_view, following, unfollowing
+from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -8,14 +8,14 @@ from django.conf import settings
 app_name = 'users'
 
 urlpatterns = [
-    path('profile/user/<int:pk>/', profile_view, name='profile'),
-    path('register/', register_view, name='register'),
-    path('login/', login_view, name='login'),
-    path('profile/settings/', profile_settings, name="profile_edit"),
-    path('members/', members_list_view, name="members_list"),
-    path('logout/', logout_view, name='logout'),
-    path('follow/<int:pk>', following, name='following'),
-    path('unfollow/<int:pk>', unfollowing, name='unfollowing'),
+    path('profile/user/<int:pk>/', views.profile_view, name='profile'),
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('profile/settings/', views.profile_settings, name="profile_edit"),
+    path('members/', views.members_list_view, name="members_list"),
+    path('logout/', views.logout_view, name='logout'),
+    path('follow/<int:pk>', views.following, name='following'),
+    path('unfollow/<int:pk>', views.unfollowing, name='unfollowing'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

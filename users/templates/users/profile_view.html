@@ -20,8 +20,8 @@
     <p class='text-light mb-1'>Followers</p>
     <p class='text-light mb-1'>Following</p>
     <p class='text-light mb-1'>0</p>
-    <p class='text-light mb-1'>{{profile_user.followers}}</p>
-    <p class='text-light mb-1'>{{profile_user.following}}</p>
+    <p class='text-light mb-1'>{{followers_count}}</p>
+    <p class='text-light mb-1'>{{following_count}}</p>
     {% if request.user == profile_user %}
     <form method='GET' action="{% url 'users:logout' %}"> {% csrf_token %}
     <button type='submit' class="btn btn-danger mt-2">Вийти</button>
@@ -29,10 +29,18 @@
     </form>
   </div>
   <div style="position:absolute; right:18px; bottom:18px;">
-      <button type="button" class="btn-accent" style="padding:0.45rem 0.9rem;">Subscribe</button>
-    {% if is_following %}
-       <button type="button" class="btn-accent" style="padding:0.45rem 0.9rem;">Unfollow</button>
-    {% endif %}
+    <form method='post', action="{% url 'users:following' profile_user.pk %}">
+      {% if request.user != profile_user  and not is_following %}
+      {% csrf_token %}
+      <button type="submit" class="btn-accent" style="padding:0.45rem 0.9rem;">Subscribe</button>
+      {% endif %}
+    </form>
+    <form method='post', action="{% url 'users:unfollowing' profile_user.pk %}">
+      {% if is_following %}
+      {% csrf_token %}
+        <button type="submit" class="btn-accent" style="padding:0.45rem 0.9rem;">Unfollow</button>
+      {% endif %}
+    </form>
   </div>
 </div>
 {% endblock %}
