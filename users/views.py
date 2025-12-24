@@ -1,11 +1,13 @@
 from urllib import request
 from django.shortcuts import render, redirect
 
-from .forms import RegisterForm
+from .forms import RegisterForm, EditProfileForm
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from .models import CustomUser, Follow
+
+from django.shortcuts import get_object_or_404
 
 
 def login_view(request):
@@ -25,15 +27,23 @@ def register_view(request):
         return render(request, 'core/home.html', {'user': user})
     return render(request, 'users/register_view.html', {'form': form})
 
-def profile_view(request, pk):
-    profile_user = CustomUser.objects.get(pk=pk)
+def profile_view(request, username):
+    profile_user = get_object_or_404(CustomUser, username=username)
     is_following = Follow.objects.filter(from_user=request.user, to_user=profile_user).exists()
     followers_count = Follow.objects.filter(to_user=profile_user).count()
     following_count = Follow.objects.filter(from_user=profile_user).count()
     return render(request, 'users/profile_view.html', {'profile_user': profile_user, 'is_following': is_following, 'followers_count': followers_count, 'following_count': following_count})
 
-def profile_settings(request):
-    return render(request, 'users/edit_profile.html')
+def profile_edit(request):
+    user = request.user
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('users:profile', username=user.username)
+    else:
+        form = EditProfileForm(instance=user)
+    return render(request, 'users/edit_profile.html', {'form': form})
 
 def members_list_view(request):
     users = CustomUser.objects.all()
@@ -44,14 +54,14 @@ def logout_view(request):
         logout(request)
         return redirect('home')
     
-def following(request, pk):
-    profile_user = CustomUser.objects.get(pk=pk)
+def following(request , username):
+    profile_user = get_object_or_404(CustomUser, username=username)
     if(request.method == 'POST'):
         Follow.objects.create(from_user=request.user, to_user=profile_user)
-    return redirect('users:profile', pk=pk)
+    return redirect('users:profile', username=profile_user.username)
 
-def unfollowing(request, pk):
-    profile_user = CustomUser.objects.get(pk=pk)
+def unfollowing(request, username):
+    profile_user = get_object_or_404(CustomUser, username=username)
     if(request.method=='POST'):
         Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
-    return redirect('users:profile', pk=pk)
+    return redirect('users:profile', username=profile_user.username)

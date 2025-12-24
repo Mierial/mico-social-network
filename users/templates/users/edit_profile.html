@@ -5,7 +5,13 @@
 {% block content %}
 
 <div>
-    <p class="text-light fw-bold"> Profile edit </p>
+    <h1 class="text-light fw-bold"> Profile edit </h1>  
+    <div class="container col-md-6 glass-card p-4 mx-auto">
+      <form method = "post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-accent w-100 mt-3">Save changes</button>
+        </form>
 </div>
 
 {% endblock %}
