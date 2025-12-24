@@ -8,6 +8,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+    def is_following(self, user):
+        return Follow.objects.filter(from_user=user, to_user=self).exists()
+    
+    def followers_count(self):
+        return Follow.objects.filter(to_user=self).count()
+    
+    def following_count(self):
+        return Follow.objects.filter(from_user=self).count()
 
 class Follow(models.Model):
     from_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='following')

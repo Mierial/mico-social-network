@@ -3,14 +3,14 @@
 {% block content %}
 <div class="container col-md-6 glass-card p-4 mx-auto" style="position:relative;">
   <div class='d-flex align-items-start gap-4'>
-    <img src='{% if profile_user.avatar %}{{ profile_user.avatar.url }}{% else %}/media/avatars/default_avatar.jpg{% endif %}' alt="avatar" 
+    <img src='{% if profile_user.avatar %}{{ profile_user.avatar.url }}
+    {% else %}/media/avatars/default_avatar.jpg{% endif %}' alt="avatar" 
     class="img-thumbnail", 
     style='width: 150px; height: 150px; object-fit: cover;'>
   
     <div>
       <p class='text-light fs-3 fw-bold'>{{ profile_user.username }}</p>
-      <p class="text-light mb-1">{{profile_user.first_name}}</p>
-      <p class="text-light mb-1">{{profile_user.last_name}}</p>
+      <p class="text-light mb-1">{{profile_user.first_name}} {{profile_user.last_name}}</p>
       <p class="text-light mb-1">{{profile_user.bio}}</p>
     </div>
     

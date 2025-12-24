@@ -11,28 +11,36 @@ from django.shortcuts import get_object_or_404
 
 
 def login_view(request):
-    form = AuthenticationForm(request, data=request.POST or None)
-    if form.is_valid():
-        user = form.get_user()
-        login(request, user)
-        return redirect('home')
-    return render(request, 'users/login_view.html',{'form': form})
+    form = AuthenticationForm(request, data=request.POST)
+
+    if(request.method=='post'):
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        return render(request, 'users/login_view.html',{'form': form})
 
 def register_view(request):
-    form = RegisterForm(request.POST, request.FILES or None)
-    if form.is_valid():
-        user = form.save(commit=False)
-        user.set_password(form.cleaned_data['password'])
-        user.save()
-        return render(request, 'core/home.html', {'user': user})
-    return render(request, 'users/register_view.html', {'form': form})
+    form = RegisterForm(request.POST, request.FILES)
+
+    if(request.method=='post'):
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+        return redirect('home.html', {'user': user})
+    else:
+        return render(request, 'users/register_view.html', {'form': form})
 
 def profile_view(request, username):
     profile_user = get_object_or_404(CustomUser, username=username)
-    is_following = Follow.objects.filter(from_user=request.user, to_user=profile_user).exists()
-    followers_count = Follow.objects.filter(to_user=profile_user).count()
-    following_count = Follow.objects.filter(from_user=profile_user).count()
-    return render(request, 'users/profile_view.html', {'profile_user': profile_user, 'is_following': is_following, 'followers_count': followers_count, 'following_count': following_count})
+    return render(request, 'users/profile_view.html', {
+        'profile_user': profile_user, 
+        'is_following': profile_user.is_following(request.user), 
+        'followers_count': profile_user.followers_count(), 
+        'following_count': profile_user.following_count(),
+        })
 
 def profile_edit(request):
     user = request.user
@@ -57,11 +65,13 @@ def logout_view(request):
 def following(request , username):
     profile_user = get_object_or_404(CustomUser, username=username)
     if(request.method == 'POST'):
-        Follow.objects.create(from_user=request.user, to_user=profile_user)
-    return redirect('users:profile', username=profile_user.username)
+        if not Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
+            Follow.objects.create(from_user=request.user, to_user=profile_user)
+        return redirect('users:profile', username=profile_user.username)
 
 def unfollowing(request, username):
     profile_user = get_object_or_404(CustomUser, username=username)
     if(request.method=='POST'):
-        Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
-    return redirect('users:profile', username=profile_user.username)
+        if Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
+            Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
+        return redirect('users:profile', username=profile_user.username)
