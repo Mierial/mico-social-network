@@ -1,0 +1,9 @@
+{% if posts %}
+    <div class="posts-grid">
+        {% for post in posts %}
+            {% include 'posts/post_card.html' %}
+        {% enfor %}
+    </div>
+{% else %}
+    <h1>There is no post yet</h1>
+{% endif %}

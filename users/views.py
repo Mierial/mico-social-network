@@ -9,17 +9,18 @@ from .models import CustomUser, Follow
 
 from django.shortcuts import get_object_or_404
 
+from .decorators import profile_user_required, login_required
+
 
 def login_view(request):
-    form = AuthenticationForm(request, data=request.POST)
+    form = AuthenticationForm(request, data=request.POST or None)
 
-    if(request.method=='post'):
+    if(request.method=='POST'):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('home')
-    else:
-        return render(request, 'users/login_view.html',{'form': form})
+    return render(request, 'users/login_view.html',{'form': form})
 
 def register_view(request):
     form = RegisterForm(request.POST, request.FILES)
@@ -33,8 +34,9 @@ def register_view(request):
     else:
         return render(request, 'users/register_view.html', {'form': form})
 
-def profile_view(request, username):
-    profile_user = get_object_or_404(CustomUser, username=username)
+@login_required
+@profile_user_required
+def profile_view(request, username, profile_user):
     return render(request, 'users/profile_view.html', {
         'profile_user': profile_user, 
         'is_following': profile_user.is_following(request.user), 
@@ -61,16 +63,18 @@ def logout_view(request):
     if request.method == "GET":
         logout(request)
         return redirect('home')
-    
-def following(request , username):
-    profile_user = get_object_or_404(CustomUser, username=username)
+
+@login_required
+@profile_user_required
+def following(request , username, profile_user):
     if(request.method == 'POST'):
         if not Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
             Follow.objects.create(from_user=request.user, to_user=profile_user)
         return redirect('users:profile', username=profile_user.username)
 
-def unfollowing(request, username):
-    profile_user = get_object_or_404(CustomUser, username=username)
+@login_required
+@profile_user_required
+def unfollowing(request, username, profile_user):
     if(request.method=='POST'):
         if Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
             Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()

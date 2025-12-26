@@ -1,0 +1,10 @@
+<div class="post-card">
+    <h2 class="post-title">{{ post.title }}</h2>
+    {% if post.image %} 
+        <img src='{{ post.image.url }}'>
+    {% endif %}
+
+    {% if post.description %}
+        <p>{{ post.description }}</p>
+    {% endif %}
+</div>
