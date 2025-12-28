@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #0f0f13;
+    }
+
+    .post-container {
+        max-width: 900px;
+        margin: 60px auto;
+        padding: 32px;
+        background: #16161d;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .post-image {
+        width: 100%;
+        height: 420px;
+        object-fit: cover;
+        border-radius: 16px;
+        margin-bottom: 24px;
+    }
+
+    .post-title {
+        font-size: 36px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #f5f5f7;
+    }
+
+    .post-description {
+        font-size: 18px;
+        line-height: 1.7;
+        color: #c7c7d1;
+        margin-bottom: 32px;
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 16px;
+    }
+
+    .btn {
+        padding: 12px 26px;
+        border-radius: 14px;
+        border: none;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1, #4338ca);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-secondary {
+        background: #22222c;
+        color: #c7c7d1;
+    }
+
+    .btn-secondary:hover {
+        background: #2c2c38;
+        transform: translateY(-3px);
+    }
+</style>
+
+<div class="post-container">
+    <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+
+    <h1 class="post-title">{{ post.title }}</h1>
+
+    <p class="post-description">
+        {{ post.description }}
+    </p>
+
+    <div class="post-actions">
+        <a href="{% url 'users:profile' post.author %}" class="btn btn-secondary">← Back</a>
+        <a href="#" class="btn btn-primary">❤️ Like</a>
+    </div>
+</div>
+{% endblock %}

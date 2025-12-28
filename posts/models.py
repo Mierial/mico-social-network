@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from users.models import CustomUser
+from django.utils import timezone
 
 class Post(models.Model):
     author = models.ForeignKey(
@@ -12,7 +13,8 @@ class Post(models.Model):
         blank=True,
         null=True,
         )
-    image = models.ImageField(upload_to='post_images/', blank=True, null=True, verbose_name='Photo')
+    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Likes(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')

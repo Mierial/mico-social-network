@@ -8,4 +8,5 @@ urlpatterns = [
     path('', home_view, name='home'),
 
     path('', include('users.urls')),
+    path('', include('posts.urls')),
 ]

@@ -7,6 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from .models import CustomUser, Follow
 
+from posts.models import Post
+
 from django.shortcuts import get_object_or_404
 
 from .decorators import profile_user_required, login_required
@@ -25,24 +27,26 @@ def login_view(request):
 def register_view(request):
     form = RegisterForm(request.POST, request.FILES)
 
-    if(request.method=='post'):
+    if(request.method=='POST'):
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-        return redirect('home.html', {'user': user})
-    else:
-        return render(request, 'users/register_view.html', {'form': form})
+        return redirect('home')
+    return render(request, 'users/register_view.html', {'form': form})
 
 @login_required
 @profile_user_required
 def profile_view(request, username, profile_user):
+    Posts = Post.objects.filter(author=profile_user)
     return render(request, 'users/profile_view.html', {
         'profile_user': profile_user, 
         'is_following': profile_user.is_following(request.user), 
         'followers_count': profile_user.followers_count(), 
         'following_count': profile_user.following_count(),
+        'posts': Posts
         })
+
 
 def profile_edit(request):
     user = request.user

@@ -1,10 +1,7 @@
 <div class="post-card">
-    <h2 class="post-title">{{ post.title }}</h2>
-    {% if post.image %} 
-        <img src='{{ post.image.url }}'>
-    {% endif %}
-
-    {% if post.description %}
-        <p>{{ post.description }}</p>
+    {% if post.image %}
+        <a href="{% url 'posts:post_view' post.id %}">
+            <img src="{{ post.image.url }}" class="post-image" style='width: 250px; height: 250px; object-fit: cover;'>
+        </a>
     {% endif %}
 </div>

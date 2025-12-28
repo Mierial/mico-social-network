@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 {% block content %}
 <div class="container col-md-6 glass-card p-4 mx-auto" style="position:relative;">
   <div class='d-flex align-items-start gap-4'>
@@ -25,6 +27,9 @@
     {% if request.user == profile_user %}
     <form method='GET' action="{% url 'users:logout' %}"> {% csrf_token %}
     <button type='submit' class="btn btn-danger mt-2">Вийти</button>
+    <a href="{% url 'posts:post_creating' %}" class="btn btn-dark btn-lg mt-2">
+       <i class="fa-regular fa-square-plus"></i>
+    </a>
     {% endif %}
     </form>
   </div>
@@ -43,4 +48,8 @@
     </form>
   </div>
 </div>
+<div class="container mt-4">
+  <div class="row">
+    {% include 'posts/posts_view.html' %}
+  </div>
 {% endblock %}
