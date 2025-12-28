@@ -16,11 +16,23 @@ def create_post_view(request):
 
 def post_view(request, id):
     post = get_object_or_404(Post, id=id)
-    return render(request, 'posts/post_page.html', {'post_id': id, 'post': post})
+
+    context = {
+        'post_id': id,
+        'post': post,
+        'is_liked': post.is_liked(request.user),
+        'likes_count': post.likes_count()
+    }
+
+    return render(request, 'posts/post_page.html', context)
 
 @post_required
-def Like(request, post):
+def Like(request, post, id):
     if request.method == 'POST':
-        Likes.objects.create(post, user=request.user)
-    
+        if post.is_liked(request.user):
+            Likes.objects.filter(post=post, user=request.user).delete()
+        else:
+            Likes.objects.create(post=post, user=request.user)
+        return redirect('posts:post_view', id=post.id)
+
     

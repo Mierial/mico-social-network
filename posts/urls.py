@@ -9,7 +9,8 @@ app_name = 'posts'
 
 urlpatterns = [
     path('post_creating/', views.create_post_view, name='post_creating'),
-    path('post/<int:id>/', views.post_view, name='post_view')
+    path('post/<int:id>/', views.post_view, name='post_view'),
+    path('like/<int:id>/', views.Like, name='like_post'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

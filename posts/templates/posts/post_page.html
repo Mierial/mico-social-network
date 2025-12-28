@@ -42,44 +42,27 @@
 
     .post-actions {
         display: flex;
-        gap: 16px;
-    }
-
-    .btn {
-        padding: 12px 26px;
-        border-radius: 14px;
-        border: none;
-        font-size: 15px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        text-decoration: none;
-        display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 20px;
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #6366f1, #4338ca);
-        color: #fff;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.35);
-    }
-
-    .btn-secondary {
-        background: #22222c;
+    .back-btn {
+        text-decoration: none;
         color: #c7c7d1;
+        background: #22222c;
+        padding: 10px 20px;
+        border-radius: 14px;
+        transition: background 0.2s ease, transform 0.2s ease;
     }
 
-    .btn-secondary:hover {
+    .back-btn:hover {
         background: #2c2c38;
-        transform: translateY(-3px);
+        transform: translateY(-2px);
     }
 </style>
 
 <div class="post-container">
+
     <img src="{{ post.image.url }}" alt="Post image" class="post-image">
 
     <h1 class="post-title">{{ post.title }}</h1>
@@ -89,8 +72,21 @@
     </p>
 
     <div class="post-actions">
-        <a href="{% url 'users:profile' post.author %}" class="btn btn-secondary">← Back</a>
-        <a href="#" class="btn btn-primary">❤️ Like</a>
+
+        <form method="POST" action="{% url 'posts:like_post' post.id %}">
+            {% csrf_token %}
+            {% if is_liked %}
+            <button type="submit" class="btn btn-danger">Unlike</button>
+            {% else %}
+            <button type="submit" class="btn">❤️</button>
+            {% endif %}
+        </form>
+
+        <a href="{% url 'users:profile' post.author %}" class="back-btn">
+            ← Back
+        </a>
+
     </div>
+
 </div>
 {% endblock %}
