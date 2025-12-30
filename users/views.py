@@ -39,13 +39,16 @@ def register_view(request):
 @profile_user_required
 def profile_view(request, username, profile_user):
     Posts = Post.objects.filter(author=profile_user)
-    return render(request, 'users/profile_view.html', {
+
+    context = {
         'profile_user': profile_user, 
         'is_following': profile_user.is_following(request.user), 
         'followers_count': profile_user.followers_count(), 
         'following_count': profile_user.following_count(),
-        'posts': Posts
-        })
+        'posts': Posts,
+        }
+
+    return render(request, 'users/profile_view.html', context)
 
 
 def profile_edit(request):

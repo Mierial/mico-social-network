@@ -35,4 +35,28 @@ def Like(request, post, id):
             Likes.objects.create(post=post, user=request.user)
         return redirect('posts:post_view', id=post.id)
 
-    
+
+def prev_post(request, post_id):
+    previous_post = (
+        Post.objects
+        .filter(id__lt=post_id)
+        .order_by('-id')
+        .first()
+    )
+
+    if not previous_post:
+        return redirect('posts:post_view', id=post_id)
+
+    return redirect('posts:post_view', id=previous_post.id)
+
+def next_post(request, post_id):
+    next_post = (
+        Post.objects
+        .filter(id__gt=post_id)
+        .order_by('id')
+        .first()
+    )
+    if not next_post:
+        return redirect('posts:post_view', id=post_id)
+
+    return redirect('posts:post_view', id=next_post.id)
