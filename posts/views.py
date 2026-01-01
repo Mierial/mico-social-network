@@ -34,7 +34,7 @@ def Like(request, post, id):
             Likes.objects.filter(post=post, user=request.user).delete()
         else:
             Likes.objects.create(post=post, user=request.user)
-        return redirect('posts:post_view', id=post.id)
+        return redirect('posts:post_view', id=post.id, username=post.author.username)
 
 
 def prev_post(request, post_id, username):
