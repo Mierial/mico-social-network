@@ -131,8 +131,9 @@
                     <button type="submit" class="btn btn-danger">Unlike</button>
                 {% else %}
                     <button type="submit" class="btn">❤️</button>
-                {% endif %}
-            </form>
+                    {% endif %}
+                </form>
+                <div>{{ post.likes_count }}</div>
 
             <a href="{% url 'users:profile' post.author %}" class="back-btn">
                 ← Back
