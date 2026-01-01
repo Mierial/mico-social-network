@@ -14,14 +14,15 @@ def create_post_view(request):
             return redirect('users:profile', username=request.user.username)
     return render(request, 'posts/post_creating.html', {'form': form})
 
-def post_view(request, id):
+def post_view(request, id, username):
     post = get_object_or_404(Post, id=id)
 
     context = {
         'post_id': id,
         'post': post,
         'is_liked': post.is_liked(request.user),
-        'likes_count': post.likes_count()
+        'likes_count': post.likes_count(),
+        'username': post.author.username
     }
 
     return render(request, 'posts/post_page.html', context)
@@ -36,27 +37,28 @@ def Like(request, post, id):
         return redirect('posts:post_view', id=post.id)
 
 
-def prev_post(request, post_id):
+def prev_post(request, post_id, username):
     previous_post = (
         Post.objects
-        .filter(id__lt=post_id)
+        .filter(author__username=username, id__lt=post_id)
         .order_by('-id')
         .first()
     )
 
     if not previous_post:
-        return redirect('posts:post_view', id=post_id)
+        return redirect('posts:post_view', id=post_id, username=username)
 
-    return redirect('posts:post_view', id=previous_post.id)
+    return redirect('posts:post_view', id=previous_post.id, username=username)
 
-def next_post(request, post_id):
+def next_post(request, post_id, username):
     next_post = (
         Post.objects
-        .filter(id__gt=post_id)
+        .filter(author__username=username, id__gt=post_id)
         .order_by('id')
         .first()
     )
-    if not next_post:
-        return redirect('posts:post_view', id=post_id)
 
-    return redirect('posts:post_view', id=next_post.id)
+    if not next_post:
+        return redirect('posts:post_view', id=post_id, username=username)
+
+    return redirect('posts:post_view', id=next_post.id, username=username)

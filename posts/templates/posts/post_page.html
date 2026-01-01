@@ -101,13 +101,13 @@
 </style>
 
 <div class="post-wrapper">
-    <a href="{% url 'posts:prev_post' post.id %}">
+    <a href="{% url 'posts:prev_post' post.author.username post.id %}">
         <div class="nav-btn nav-left">
             <i class="fa-solid fa-angle-left"></i>
         </div>
     </a>
 
-    <a href="{% url 'posts:next_post' post.id %}">
+    <a href="{% url 'posts:next_post' post.author.username post.id %}">
         <div class="nav-btn nav-right">
             <i class="fa-solid fa-angle-right"></i>
         </div>
