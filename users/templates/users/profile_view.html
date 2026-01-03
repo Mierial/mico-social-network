@@ -1,55 +1,172 @@
 {% extends 'base.html' %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% block title %}{{ profile_user.username }} | Profile{% endblock %}
+
+{% block styles %}
+<style>
+/* === GLASS CARD === */
+.glass-card {
+    background: linear-gradient(145deg, rgba(20,20,20,0.85), rgba(10,10,10,0.95));
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* === AVATAR === */
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 2px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* === TEXT === */
+.profile-username {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #f5f5f5;
+}
+
+.profile-name {
+    color: #b0b0b0;
+}
+
+.profile-bio {
+    color: #d0d0d0;
+    max-width: 420px;
+}
+
+/* === STATS === */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+    margin-top: 25px;
+}
+
+.stat-label {
+    color: #9a9a9a;
+    font-size: 0.85rem;
+}
+
+.stat-value {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* === BUTTONS === */
+.btn-accent {
+    background: linear-gradient(135deg, #6d5dfc, #9f7cff);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(120,100,255,0.5);
+}
+
+.btn-dark {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.btn-dark:hover {
+    background: rgba(255,255,255,0.08);
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container col-md-6 glass-card p-4 mx-auto" style="position:relative;">
-  <div class='d-flex align-items-start gap-4'>
-    <img src='{% if profile_user.avatar %}{{ profile_user.avatar.url }}
-    {% else %}/media/avatars/default_avatar.jpg{% endif %}' alt="avatar" 
-    class="img-thumbnail", 
-    style='width: 150px; height: 150px; object-fit: cover;'>
-  
-    <div>
-      <p class='text-light fs-3 fw-bold'>{{ profile_user.username }}</p>
-      <p class="text-light mb-1">{{profile_user.first_name}} {{profile_user.last_name}}</p>
-      <p class="text-light mb-1">{{profile_user.bio}}</p>
+<div class="container col-md-8 mx-auto glass-card p-4">
+
+    <!-- PROFILE HEADER -->
+    <div class="d-flex justify-content-between align-items-start gap-4 flex-wrap">
+
+        <div class="d-flex gap-4">
+            <img src="{% if profile_user.avatar %}{{ profile_user.avatar.url }}{% else %}/media/avatars/default_avatar.jpg{% endif %}"
+                 class="profile-avatar">
+
+            <div>
+                <h2 class="profile-username mb-1">{{ profile_user.username }}</h2>
+                <p class="profile-name mb-1">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+                <p class="profile-bio">{{ profile_user.bio|default:"No bio yet." }}</p>
+            </div>
+        </div>
+
+        <!-- FOLLOW / UNFOLLOW -->
+        {% if request.user != profile_user %}
+            <div class="d-flex gap-2">
+                {% if not is_following %}
+                    <form method="post" action="{% url 'users:following' profile_user.username %}">
+                        {% csrf_token %}
+                        <button class="btn-accent">Follow</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'users:unfollowing' profile_user.username %}">
+                        {% csrf_token %}
+                        <button class="btn-accent">Unfollow</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
     </div>
-    
-  </div>
-  <div class="row row-cols-3 mt-3">
-    <p class='text-light mb-1'>Posts</p>
-    <p class='text-light mb-1'>Followers</p>
-    <p class='text-light mb-1'>Following</p>
-    <p class='text-light mb-1'>0</p>
-    <p class='text-light mb-1'>{{followers_count}}</p>
-    <p class='text-light mb-1'>{{following_count}}</p>
+
+    <!-- STATS -->
+    <div class="row row-cols-3 text-center mt-4 border-top pt-3">
+        <div>
+            <p class="stat-label mb-0">Posts</p>
+            <p class="stat-value fs-5">0</p>
+        </div>
+        <div>
+            <p class="stat-label mb-0">Followers</p>
+            <p class="stat-value fs-5">{{ followers_count }}</p>
+        </div>
+        <div>
+            <p class="stat-label mb-0">Following</p>
+            <p class="stat-value fs-5">{{ following_count }}</p>
+        </div>
+    </div>
+
+    <!-- ACTIONS FOR OWNER -->
     {% if request.user == profile_user %}
-    <form method='GET' action="{% url 'users:logout' %}"> {% csrf_token %}
-    <button type='submit' class="btn btn-danger mt-2">Вийти</button>
-    <a href="{% url 'posts:post_creating' %}" class="btn btn-dark btn-lg mt-2">
-       <i class="fa-regular fa-square-plus"></i>
-    </a>
+        <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'posts:post_creating' %}" class="btn-accent">
+                <i class="bi bi-plus-square"></i> New Post
+            </a>
+
+            <form method="GET" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    Logout
+                </button>
+            </form>
+        </div>
     {% endif %}
-    </form>
-  </div>
-  <div style="position:absolute; right:18px; bottom:18px;">
-    <form method='post', action="{% url 'users:following' profile_user.username %}">
-      {% if request.user != profile_user  and not is_following %}
-      {% csrf_token %}
-      <button type="submit" class="btn-accent" style="padding:0.45rem 0.9rem;">Subscribe</button>
-      {% endif %}
-    </form>
-    <form method='post', action="{% url 'users:unfollowing' profile_user.username %}">
-      {% if is_following %}
-      {% csrf_token %}
-        <button type="submit" class="btn-accent" style="padding:0.45rem 0.9rem;">Unfollow</button>
-      {% endif %}
-    </form>
-  </div>
+
 </div>
+
+<!-- POSTS GRID -->
 <div class="container mt-4">
-  <div class="row">
-    {% include 'posts/posts_view.html' %}
-  </div>
+    <div class="row g-3">
+        {% for post in posts %}
+            <div class="col-md-4 col-sm-6">
+                <div class="glass-card p-2">
+                    <a href="{% url 'posts:post_view' post.author.username post.id %}">
+                        <img src="{{ post.image.url }}" class="img-fluid rounded" style="aspect-ratio:1/1;object-fit:cover;">
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-muted mt-4">No posts yet.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

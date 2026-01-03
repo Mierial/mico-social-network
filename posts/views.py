@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm
-from .models import Post, Likes
+from .models import Post, Likes, CustomUser
 from .decorators import post_required
 
 def create_post_view(request):
@@ -62,3 +62,7 @@ def next_post(request, post_id, username):
         return redirect('posts:post_view', id=post_id, username=username)
 
     return redirect('posts:post_view', id=next_post.id, username=username)
+
+def feed_view(request):
+    posts = Post.objects.filter(author__in=request.user.following_list())
+    return render(request ,'posts/feed.html', {'posts': posts})

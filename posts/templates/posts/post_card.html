@@ -1,7 +1,58 @@
 <div class="post-card">
     {% if post.image %}
-        <a href="{% url 'posts:post_view' post.author.username post.id %}">
-            <img src="{{ post.image.url }}" class="post-image" style='width: 250px; height: 250px; object-fit: cover;'>
+        <a href="{% url 'posts:post_view' post.author.username post.id %}" class="post-image-link">
+            <img src="{{ post.image.url }}" class="post-image">
         </a>
     {% endif %}
 </div>
+
+<style>
+.post-card {
+    width: 250px;
+    background: linear-gradient(180deg, #141414, #0c0c0c);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.85);
+}
+
+/* === IMAGE === */
+.post-image-link {
+    display: block;
+    width: 100%;
+    height: 250px;
+    position: relative;
+}
+
+.post-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.9);
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.post-card:hover .post-image {
+    filter: brightness(1);
+    transform: scale(1.05);
+}
+
+.post-image-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.65),
+        rgba(0,0,0,0.15),
+        rgba(0,0,0,0)
+    );
+    pointer-events: none;
+}
+</style>

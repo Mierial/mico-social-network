@@ -50,7 +50,6 @@ def profile_view(request, username, profile_user):
 
     return render(request, 'users/profile_view.html', context)
 
-
 def profile_edit(request):
     user = request.user
     if request.method == 'POST':

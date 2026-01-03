@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Posts Feed{% endblock %}
+
+{% block content %}
+
+<style>
+/* === FEED === */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.post-card {
+    width: 100%;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+}
+
+/* === IMAGE === */
+.post-image-link {
+    display: block;
+    width: 100%;
+    height: 250px;
+}
+
+.post-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+</style>
+
+<div class="posts-grid">
+    {% for post in posts %}
+        <div class="post-card">
+            {% if post.image %}
+                <a href="{% url 'posts:post_view' post.author.username post.id %}" class="post-image-link">
+                    <img src="{{ post.image.url }}" class="post-image">
+                </a>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p style="text-align:center; color:#777;">Постів поки немає 😢</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
