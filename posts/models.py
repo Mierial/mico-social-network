@@ -21,6 +21,7 @@ class Post(models.Model):
 
     def likes_count(self):
         return Likes.objects.filter(post=self).count()
+    
 
 class Likes(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')

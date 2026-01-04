@@ -4,6 +4,19 @@ from .forms import PostForm
 from .models import Post, Likes, CustomUser
 from .decorators import post_required
 
+from django.views.generic import DetailView
+
+class PostDetailedView(DetailView):
+    model = Post
+    template_name = 'posts/post_page.html'
+    context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_liked'] = self.object.is_liked(self.request.user)
+        context['likes_count'] = self.object.likes_count()
+        return context
+
 def create_post_view(request):
     form = PostForm(request.POST, request.FILES)
     if request.method == 'POST':
@@ -14,19 +27,6 @@ def create_post_view(request):
             return redirect('users:profile', username=request.user.username)
     return render(request, 'posts/post_creating.html', {'form': form})
 
-def post_view(request, id, username):
-    post = get_object_or_404(Post, id=id)
-
-    context = {
-        'post_id': id,
-        'post': post,
-        'is_liked': post.is_liked(request.user),
-        'likes_count': post.likes_count(),
-        'username': post.author.username
-    }
-
-    return render(request, 'posts/post_page.html', context)
-
 @post_required
 def Like(request, post, id):
     if request.method == 'POST':
@@ -34,7 +34,7 @@ def Like(request, post, id):
             Likes.objects.filter(post=post, user=request.user).delete()
         else:
             Likes.objects.create(post=post, user=request.user)
-        return redirect('posts:post_view', id=post.id, username=post.author.username)
+        return redirect('posts:post_view', pk=post.id, username=post.author.username)
 
 
 def prev_post(request, post_id, username):
@@ -46,9 +46,9 @@ def prev_post(request, post_id, username):
     )
 
     if not previous_post:
-        return redirect('posts:post_view', id=post_id, username=username)
+        return redirect('posts:post_view', username=username, pk=post_id)
 
-    return redirect('posts:post_view', id=previous_post.id, username=username)
+    return redirect('posts:post_view', username=username, pk=previous_post.id)
 
 def next_post(request, post_id, username):
     next_post = (
@@ -59,9 +59,9 @@ def next_post(request, post_id, username):
     )
 
     if not next_post:
-        return redirect('posts:post_view', id=post_id, username=username)
+        return redirect('posts:post_view', pk=post_id, username=username)
 
-    return redirect('posts:post_view', id=next_post.id, username=username)
+    return redirect('posts:post_view', pk=next_post.id, username=username)
 
 def feed_view(request):
     posts = Post.objects.filter(author__in=request.user.following_list())

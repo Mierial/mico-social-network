@@ -1,6 +1,6 @@
 <div class="post-card">
     {% if post.image %}
-        <a href="{% url 'posts:post_view' post.author.username post.id %}" class="post-image-link">
+        <a href="{% url 'posts:post_view' post.author.username post.pk %}" class="post-image-link">
             <img src="{{ post.image.url }}" class="post-image">
         </a>
     {% endif %}
