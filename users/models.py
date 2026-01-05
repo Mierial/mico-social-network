@@ -18,14 +18,10 @@ class CustomUser(AbstractUser):
     def following_count(self):
         return Follow.objects.filter(from_user=self).count()
     
-    def is_friends(self, other_user):
+    def is_friends_with(self, other_user):
         return Follow.objects.filter(
-            from_user = self, 
-            to_user= other_user
-            ).exists() and Follow.objects.filter(
-                from_user=other_user, 
-                to_user=self
-                ).exists()
+            from_user__in=[self, other_user], 
+            to_user__in=[self, other_user]).count() == 2
 
     def following_list(self):
         return CustomUser.objects.filter(followers__from_user=self)
