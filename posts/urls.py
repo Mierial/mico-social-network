@@ -16,8 +16,7 @@ urlpatterns = [
     path('prev/<str:username>/<int:post_id>/', views.prev_post, name='prev_post'),
     path('next/<str:username>/<int:post_id>/', views.next_post, name='next_post'),
     path('feed/', views.feed_view, name='feed'),
-    path('comments/<int:id>/', views.post_comments_view, name='comments_view'),
-    path('add_comment_to_post/<int:pk>/', views.add_comment_to_post, name='add_comment')
+    path('comments/<int:pk>/', views.post_comments_view, name='comments_view'),
 
 ]
 

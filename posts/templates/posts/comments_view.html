@@ -10,7 +10,7 @@
             <p>{{ comment.content }}</p>
         </div>
         {% endfor %}
-        <form method = 'POST' action="{% url 'posts:add_comment' post.id %}">
+        <form method = 'POST' action="{% url 'posts:comments_view' post.id %}">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">send</button>

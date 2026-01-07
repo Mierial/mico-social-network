@@ -65,19 +65,24 @@ def feed_view(request):
     posts = Post.objects.filter(author__in=request.user.following_list())
     return render(request ,'posts/feed.html', {'posts': posts})
     
-def post_comments_view(request, id):
-    post = get_object_or_404(Post, id=id)
+def post_comments_view(request, pk):
+    post = get_object_or_404(Post, id=pk)
     comments_post = post.comments.all()
-    return render(request, 'posts/comments_view.html', {'comments': comments_post, 'post': post})
- 
-def add_comment_to_post(request, pk):
-    if request.method == 'POST':
+
+    if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.author = request.user
-            comment.post = Post.objects.get(id=pk)
+            comment.post = post
             comment.save()
-            return redirect('posts:post_view', pk=pk, username=request.user.username)
-    return render(request, 'posts/post_page.html', {'post': Post.objects.get(id=pk)})
-
+            return redirect('posts:comments_view', pk=pk)
+    else:
+        form = CommentForm()
+    context = ({
+        'comments': comments_post, 
+        'post': post, 
+        'form': form,
+    })
+    return render(request, 'posts/comments_view.html',  context)
+ 
