@@ -16,18 +16,7 @@ class PostDetailedView(DetailView):
         context['is_liked'] = self.object.is_liked(self.request.user)
         context['likes_count'] = self.object.likes_count()
         context['comments'] = self.object.comments.all()
-        context['form'] = CommentForm()
         return context
-    
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = self.object
-            comment.author = self.request.user
-            comment.save()
-        return redirect('posts:post_view', username=self.object.author.username, pk=self.object.id)
 
 class create_post_view(CreateView):
     template_name = 'posts/post_creating.html'
@@ -80,3 +69,15 @@ def post_comments_view(request, id):
     post = get_object_or_404(Post, id=id)
     comments_post = post.comments.all()
     return render(request, 'posts/comments_view.html', {'comments': comments_post, 'post': post})
+ 
+def add_comment_to_post(request, pk):
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.post = Post.objects.get(id=pk)
+            comment.save()
+            return redirect('posts:post_view', pk=pk, username=request.user.username)
+    return render(request, 'posts/post_page.html', {'post': Post.objects.get(id=pk)})
+
