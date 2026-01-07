@@ -9,6 +9,8 @@ from .models import CustomUser, Follow
 
 from posts.models import Post
 
+from django.views.generic import DetailView
+
 from django.shortcuts import get_object_or_404
 
 from .decorators import profile_user_required, login_required

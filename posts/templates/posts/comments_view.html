@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Коментарі {% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-dark min-vh-100 py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="d-flex align-items-center mb-4 border-bottom border-secondary pb-3">
+                <a href="{% url 'posts:post_view' post.author.username post.id %}" class="text-decoration-none text-light me-3 fs-4">
+                    <i class="bi bi-arrow-left">&larr;</i> </a>
+                <h4 class="text-white mb-0">Коментарі</h4>
+            </div>
+
+            <div class="comments-list mb-5">
+                {% for comment in comments %}
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            {% if comment.author.avatar %}
+                                <img src="{{ comment.author.avatar.url }}" class="rounded-circle border border-secondary" width="40" height="40" style="object-fit: cover;" alt="{{ comment.author.username }}">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                    {{ comment.author.username|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex-grow-1 ms-3">
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <h6 class="mb-0 text-white fw-bold">{{ comment.author.username }}</h6>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ comment.created_at|timesince }} тому</small>
+                            </div>
+                            
+                            <p class="text-light mt-1 mb-0 opacity-75" style="font-size: 0.95rem; line-height: 1.4;">
+                                {{ comment.content }}
+                            </p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted py-5">
+                        <p>Коментарів ще немає. Напишіть щось!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="card bg-dark border-secondary mt-4">
+                <div class="card-body p-2">
+                    <form method="POST" class="d-flex align-items-center gap-2">
+                        {% csrf_token %}
+                        
+                        <img src="{{ user.avatar.url }}" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
+                        
+                        <input type="text" name="content" class="form-control bg-secondary text-white border-0 rounded-pill" placeholder="Додати коментар..." required style="box-shadow: none;">
+                        
+                        <button type="submit" class="btn btn-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                            ➤
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Робимо placeholder світлішим, бо на dark input його погано видно */
+    .form-control::placeholder {
+        color: #adb5bd;
+        opacity: 0.7;
+    }
+    /* Прибираємо білий фон автозаповнення в браузерах */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus {
+        -webkit-text-fill-color: white;
+        -webkit-box-shadow: 0 0 0px 1000px #6c757d inset;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+{% endblock %}

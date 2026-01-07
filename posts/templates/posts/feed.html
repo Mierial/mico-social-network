@@ -5,55 +5,92 @@
 {% block content %}
 
 <style>
-/* === FEED === */
-.posts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    max-width: 1100px;
-    margin: 40px auto;
+.feed {
+    max-width: 620px;
+    margin: 50px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .post-card {
-    width: 100%;
-    background: #fff;
-    border-radius: 14px;
+    background: linear-gradient(180deg, #121212, #0e0e0e);
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: all 0.25s ease;
 }
 
 .post-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+    box-shadow:
+        0 18px 45px rgba(0,0,0,0.9),
+        0 0 0 1px rgba(255,255,255,0.15),
+        0 0 25px rgba(120,120,255,0.15);
 }
 
 /* === IMAGE === */
-.post-image-link {
-    display: block;
-    width: 100%;
-    height: 250px;
-}
-
 .post-image {
     width: 100%;
-    height: 100%;
+    height: 360px;
     object-fit: cover;
     display: block;
 }
+
+/* === CONTENT === */
+.post-content {
+    padding: 18px 20px 22px;
+}
+
+.post-title {
+    font-size: 21px;
+    font-weight: 600;
+    color: #f1f1f1;
+    margin-bottom: 8px;
+}
+
+.post-description {
+    font-size: 15px;
+    color: #b5b5b5;
+    line-height: 1.45;
+    margin-bottom: 14px;
+}
+
+.post-meta {
+    font-size: 13px;
+    color: #888;
+}
+
+/* === EMPTY === */
+.empty-feed {
+    text-align: center;
+    color: #666;
+    margin-top: 90px;
+}
 </style>
 
-<div class="posts-grid">
+<div class="feed">
     {% for post in posts %}
         <div class="post-card">
+
             {% if post.image %}
-                <a href="{% url 'posts:post_view' post.author.username post.id %}" class="post-image-link">
+                <a href="{% url 'posts:post_view' post.author.username post.id %}">
                     <img src="{{ post.image.url }}" class="post-image">
                 </a>
             {% endif %}
+
+            <div class="post-content">
+                <h3 class="post-title">{{ post.title }}</h3>
+                <p class="post-description">{{ post.description|truncatechars:120 }}</p>
+                <div class="post-meta">@{{ post.author.username }}</div>
+            </div>
+
         </div>
     {% empty %}
-        <p style="text-align:center; color:#777;">Постів поки немає 😢</p>
+        <p class="empty-feed">Постів поки немає 😢</p>
     {% endfor %}
 </div>
 

@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm
-from .models import Post, Likes, CustomUser
+from .forms import PostForm, CommentForm
+from .models import Post, Likes, CustomUser, Comment
 from .decorators import post_required
 
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView
 
 class PostDetailedView(DetailView):
     model = Post
@@ -15,18 +15,28 @@ class PostDetailedView(DetailView):
         context = super().get_context_data(**kwargs)
         context['is_liked'] = self.object.is_liked(self.request.user)
         context['likes_count'] = self.object.likes_count()
+        context['comments'] = self.object.comments.all()
+        context['form'] = CommentForm()
         return context
-
-def create_post_view(request):
-    form = PostForm(request.POST, request.FILES)
-    if request.method == 'POST':
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = CommentForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect('users:profile', username=request.user.username)
-    return render(request, 'posts/post_creating.html', {'form': form})
+            comment = form.save(commit=False)
+            comment.post = self.object
+            comment.author = self.request.user
+            comment.save()
+        return redirect('posts:post_view', username=self.object.author.username, pk=self.object.id)
 
+class create_post_view(CreateView):
+    template_name = 'posts/post_creating.html'
+    form_class = PostForm
+    success_url = '/feed/'
+    def form_valid(self, form):
+        form.instance.author = self.request.user    
+        return super().form_valid(form)
+    
 @post_required
 def Like(request, post, id):
     if request.method == 'POST':
@@ -35,7 +45,6 @@ def Like(request, post, id):
         else:
             Likes.objects.create(post=post, user=request.user)
         return redirect('posts:post_view', pk=post.id, username=post.author.username)
-
 
 def prev_post(request, post_id, username):
     previous_post = (
@@ -66,3 +75,8 @@ def next_post(request, post_id, username):
 def feed_view(request):
     posts = Post.objects.filter(author__in=request.user.following_list())
     return render(request ,'posts/feed.html', {'posts': posts})
+    
+def post_comments_view(request, id):
+    post = get_object_or_404(Post, id=id)
+    comments_post = post.comments.all()
+    return render(request, 'posts/comments_view.html', {'comments': comments_post, 'post': post})
