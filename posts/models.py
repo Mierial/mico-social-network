@@ -36,7 +36,7 @@ class Comment(models.Model):
 
     def likes_count(self):
         return CommentLike.objects.filter(comment=self).count()
-
+    
 class CommentLike(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

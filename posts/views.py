@@ -67,8 +67,10 @@ def feed_view(request):
     
 def post_comments_view(request, pk):
     post = get_object_or_404(Post, id=pk)
-    comments_post = post.comments.all()
+    comments_post = post.comments.all().order_by('-created_at')
 
+    for comment in comments_post:
+        comment.is_liked = CommentLike.objects.filter(comment=comment, user=request.user).exists()
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
