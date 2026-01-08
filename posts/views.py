@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm, CommentForm
-from .models import Post, Likes, CustomUser, Comment
+from .models import Post, Likes, CustomUser, Comment, CommentLike
 from .decorators import post_required
 
 from django.views.generic import DetailView, CreateView
@@ -86,3 +86,11 @@ def post_comments_view(request, pk):
     })
     return render(request, 'posts/comments_view.html',  context)
  
+def like_comment(request, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    if request.method == 'POST':
+        if CommentLike.objects.filter(user=request.user, comment=comment).exists():
+            CommentLike.objects.filter(user=request.user, comment=comment).delete()
+        else:
+            CommentLike.objects.create(comment=comment, user=request.user)
+        return redirect('posts:comments_view', pk=comment.post.id)

@@ -33,3 +33,11 @@ class Comment(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     content = models.CharField(max_length=400)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def likes_count(self):
+        return CommentLike.objects.filter(comment=self).count()
+
+class CommentLike(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -5,11 +5,22 @@
 {% block content %}
 <div class='container'>
     {% for comment in comments %}
-        <img src="{{ comment.author.avatar.url }}" class="rounded-circle" alt="{{ comment.author.username }}">
         <div>
+        <img src="{{ comment.author.avatar.url }}" class="rounded float-left" alt="{{ comment.author.username }}" width="70" height="70">
             <p>{{ comment.content }}</p>
         </div>
+        <form method="POST" action="{% url 'posts:like_comment' comment.id %}">
+            {% csrf_token %}
+            <button type="submit">
+                {% if comment.is_liked %}
+                    <i class="fa-solid fa-heart text-danger"></i>
+                {% else %}
+                    <i class="fa-regular fa-heart"></i>
+                {% endif %}
+            </button>
+        </form>
         {% endfor %}
+            
         <form method = 'POST' action="{% url 'posts:comments_view' post.id %}">
             {% csrf_token %}
             {{ form.as_p }}
