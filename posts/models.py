@@ -21,6 +21,9 @@ class Post(models.Model):
 
     def likes_count(self):
         return Likes.objects.filter(post=self).count()
+    def is_user_post_creator(self, user):
+        return True if self.author == user else False
+            
     
 
 class Likes(models.Model):
@@ -36,6 +39,12 @@ class Comment(models.Model):
 
     def likes_count(self):
         return CommentLike.objects.filter(comment=self).count()
+
+    def is_liked_by(self, user):
+        return CommentLike.objects.filter(comment=self, user=user).exists()
+
+    class Meta:
+        ordering = ['-created_at']
     
 class CommentLike(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)

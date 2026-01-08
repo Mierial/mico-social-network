@@ -17,8 +17,8 @@ urlpatterns = [
     path('next/<str:username>/<int:post_id>/', views.next_post, name='next_post'),
     path('feed/', views.feed_view, name='feed'),
     path('comments/<int:pk>/', views.post_comments_view, name='comments_view'),
-    path('like_comment/<int:pk>', views.like_comment, name='like_comment')
-
+    path('like_comment/<int:pk>', views.like_comment, name='like_comment'),
+    path('delete/comment/<int:pk>/', views.delete_comment, name='delete_comment')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

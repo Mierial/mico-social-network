@@ -67,10 +67,11 @@ def feed_view(request):
     
 def post_comments_view(request, pk):
     post = get_object_or_404(Post, id=pk)
-    comments_post = post.comments.all().order_by('-created_at')
+    comments_post = post.comments.all()
 
     for comment in comments_post:
-        comment.is_liked = CommentLike.objects.filter(comment=comment, user=request.user).exists()
+        comment.liked = comment.is_liked_by(request.user)
+    
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -81,10 +82,13 @@ def post_comments_view(request, pk):
             return redirect('posts:comments_view', pk=pk)
     else:
         form = CommentForm()
+
     context = ({
         'comments': comments_post, 
         'post': post, 
         'form': form,
+        'user': request.user,
+        'is_user_post_creator': post.is_user_post_creator(request.user),
     })
     return render(request, 'posts/comments_view.html',  context)
  
@@ -95,4 +99,10 @@ def like_comment(request, pk):
             CommentLike.objects.filter(user=request.user, comment=comment).delete()
         else:
             CommentLike.objects.create(comment=comment, user=request.user)
+        return redirect('posts:comments_view', pk=comment.post.id)
+
+def delete_comment(request, pk):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=pk)
+        Comment.objects.filter(id=pk).delete()
         return redirect('posts:comments_view', pk=comment.post.id)
