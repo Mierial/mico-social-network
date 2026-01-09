@@ -16,6 +16,7 @@ class PostDetailedView(DetailView):
         context['is_liked'] = self.object.is_liked(self.request.user)
         context['likes_count'] = self.object.likes_count()
         context['comments'] = self.object.comments.all()
+        context['is_user_post_creator'] = self.object.is_user_post_creator(self.request.user)
         return context
 
 class create_post_view(CreateView):
@@ -106,3 +107,10 @@ def delete_comment(request, pk):
         comment = get_object_or_404(Comment, id=pk)
         Comment.objects.filter(id=pk).delete()
         return redirect('posts:comments_view', pk=comment.post.id)
+
+@post_required
+def delete_post(request, post, id):
+    if request.method == 'POST':
+        author_username = post.author.username
+        post.delete()
+    return redirect('users:profile', username=author_username)

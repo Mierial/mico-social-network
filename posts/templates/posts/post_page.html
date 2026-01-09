@@ -101,6 +101,14 @@
 </style>
 
 <div class="post-wrapper">
+    {% if is_user_post_creator %}
+                                      <form method="POST" action="{% url 'posts:delete_post' post.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit">
+                                            <i class="fa-solid fa-trash fs-5"></i>
+                                        </button>
+                                        </form>
+                                    {% endif %}
     <a href="{% url 'posts:prev_post' post.author.username post.pk %}">
         <div class="nav-btn nav-left">
             <i class="fa-solid fa-angle-left"></i>
