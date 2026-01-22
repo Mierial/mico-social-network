@@ -36,7 +36,7 @@
                                     <form method="POST" action="{% url 'posts:like_comment' comment.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-link p-0 text-decoration-none" style="border: none; background: none;">
-                                            {% if comment.liked %}
+                                            {% if comment.is_liked %}
                                                 <i class="fa-solid fa-heart text-danger fs-5"></i>
                                             {% else %}
                                                 <i class="fa-regular fa-heart text-light fs-5"></i>

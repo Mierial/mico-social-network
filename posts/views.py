@@ -1,25 +1,37 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
+from users.decorators import login_required
+
 from .forms import PostForm, CommentForm
-from .models import Post, Likes, CustomUser, Comment, CommentLike
+from .models import Post, Like, Comment, CommentLike
 from .decorators import post_required
 
+from django.core.paginator import Paginator
+
 from django.views.generic import DetailView, CreateView
+
+from .serializers import CommentSerializer, PostSerializer
+from rest_framework import viewsets, permissions
+
+from django.db.models import Count, Exists, OuterRef
 
 class PostDetailedView(DetailView):
     model = Post
     template_name = 'posts/post_page.html'
     context_object_name = 'post'
 
+    def get_queryset(self):
+        query_set = super().get_queryset()
+        return query_set.annotate(is_liked=Exists(Like.objects.filter(post=OuterRef('pk'), user=self.request.user)), likes_count=Count('likes', distinct=True))
+    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_liked'] = self.object.is_liked(self.request.user)
-        context['likes_count'] = self.object.likes_count()
-        context['comments'] = self.object.comments.all()
-        context['is_user_post_creator'] = self.object.is_user_post_creator(self.request.user)
+        context['comments'] = self.object.comments.select_related('author').annotate(likes_count=Count('likes'))
+        context['is_user_post_creator'] = self.object.author == self.request.user
         return context
 
-class create_post_view(CreateView):
+class CreatePostView(CreateView):
     template_name = 'posts/post_creating.html'
     form_class = PostForm
     success_url = '/feed/'
@@ -28,12 +40,12 @@ class create_post_view(CreateView):
         return super().form_valid(form)
     
 @post_required
-def Like(request, post, id):
+def like_post(request, post, id):
     if request.method == 'POST':
-        if post.is_liked(request.user):
-            Likes.objects.filter(post=post, user=request.user).delete()
+        if Like.objects.filter(post=post, user=request.user).exists():
+            Like.objects.filter(post=post, user=request.user).delete()
         else:
-            Likes.objects.create(post=post, user=request.user)
+            Like.objects.create(post=post, user=request.user)
         return redirect('posts:post_view', pk=post.id, username=post.author.username)
 
 def prev_post(request, post_id, username):
@@ -63,16 +75,27 @@ def next_post(request, post_id, username):
     return redirect('posts:post_view', pk=next_post.id, username=username)
 
 def feed_view(request):
-    posts = Post.objects.filter(author__in=request.user.following_list())
-    return render(request ,'posts/feed.html', {'posts': posts})
+    posts = Post.objects.filter(author__in=request.user.following_list()).select_related('author').annotate(
+        likes_count=Count('likes', distinct=True),
+          is_liked=Exists(
+              Like.objects.filter(post=OuterRef('pk'), user=request.user)
+              )
+            ).order_by('-created_at')
+    
+    posts_per_page = 2
+    paginator = Paginator(posts, posts_per_page)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request ,'posts/feed.html', {'posts': page_obj})
     
 def post_comments_view(request, pk):
     post = get_object_or_404(Post, id=pk)
-    comments_post = post.comments.all()
-
-    for comment in comments_post:
-        comment.liked = comment.is_liked_by(request.user)
-    
+    all_comments = post.comments.all().select_related('author').annotate(
+        likes_count=Count('likes'), is_liked=Exists(CommentLike.objects.filter(
+            user=request.user, comment=OuterRef('pk')
+        ))
+    )
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -85,14 +108,15 @@ def post_comments_view(request, pk):
         form = CommentForm()
 
     context = ({
-        'comments': comments_post, 
+        'comments': all_comments, 
         'post': post, 
         'form': form,
         'user': request.user,
-        'is_user_post_creator': post.is_user_post_creator(request.user),
+        'is_user_post_creator': post.author == request.user
     })
     return render(request, 'posts/comments_view.html',  context)
- 
+
+@login_required
 def like_comment(request, pk):
     comment = get_object_or_404(Comment, id=pk)
     if request.method == 'POST':
@@ -103,14 +127,35 @@ def like_comment(request, pk):
         return redirect('posts:comments_view', pk=comment.post.id)
 
 def delete_comment(request, pk):
+    comment = get_object_or_404(Comment, id=pk)
     if request.method == 'POST':
-        comment = get_object_or_404(Comment, id=pk)
-        Comment.objects.filter(id=pk).delete()
+        if request.user == comment.author or request.user == comment.post.author:
+            Comment.objects.filter(id=pk).delete()
         return redirect('posts:comments_view', pk=comment.post.id)
 
 @post_required
 def delete_post(request, post, id):
     if request.method == 'POST':
-        author_username = post.author.username
-        post.delete()
+        if request.user == post.author:
+            author_username = post.author.username
+            post.delete()
     return redirect('users:profile', username=author_username)
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        queryset = Post.objects.select_related('author').annotate(
+            likes_count=Count('likes', distinct=True), 
+            is_liked=Exists(Like.objects.filter(user=user, post=OuterRef('pk'))
+                )
+            )
+        return queryset.order_by('-created_at')   
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()

@@ -1,11 +1,12 @@
 from urllib import request
 from django.shortcuts import render, redirect
-
 from .forms import RegisterForm, EditProfileForm
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from .models import CustomUser, Follow
+
+from django.db.models import Count, Exists, OuterRef
 
 from posts.models import Post
 
@@ -40,14 +41,14 @@ def register_view(request):
 @login_required
 @profile_user_required
 def profile_view(request, username, profile_user):
-    Posts = Post.objects.filter(author=profile_user)
+    posts = Post.objects.filter(author=profile_user)
 
     context = {
         'profile_user': profile_user, 
-        'is_following': profile_user.is_following(request.user), 
+        'is_following': Follow.objects.filter(from_user=request.user, to_user=profile_user).exists(),
         'followers_count': profile_user.followers_count(), 
         'following_count': profile_user.following_count(),
-        'posts': Posts,
+        'posts': posts.select_related('author').annotate(likes_count=Count('likes')),
         }
 
     return render(request, 'users/profile_view.html', context)
@@ -64,7 +65,7 @@ def profile_edit(request):
     return render(request, 'users/edit_profile.html', {'form': form})
 
 def members_list_view(request):
-    users = CustomUser.objects.all()
+    users = CustomUser.objects.annotate(is_following=Exists(Follow.objects.filter(from_user=request.user, to_user=OuterRef('pk'))))
     return render(request, 'users/members_list.html', {'users': users})
 
 def logout_view(request):
