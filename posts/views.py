@@ -184,4 +184,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def _get_comments_by_post_queryset(self):
         user = self.request.user
         return Comment.objects.select_related('author').annotate(is_liked=Exists(CommentLike.objects.filter(user=user, comment=OuterRef('pk'))))
-        
