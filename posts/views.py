@@ -177,10 +177,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         post_id = self.request.query_params.get('post_id')
         queryset = self._get_comments_by_post_queryset()
-        if post_id:
+        if post_id and self.request.user.is_authenticated:
             queryset = queryset.filter(post__id=post_id)
         return queryset.order_by('-created_at')
-
+    
     def _get_comments_by_post_queryset(self):
         user = self.request.user
         return Comment.objects.select_related('author').annotate(is_liked=Exists(CommentLike.objects.filter(user=user, comment=OuterRef('pk'))))
