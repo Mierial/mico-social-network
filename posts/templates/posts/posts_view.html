@@ -1,9 +1,0 @@
-{% if posts %}
-    <div class="container d-flex flex-wrap gap-3 justify-content-center">
-        {% for post in posts %}
-            {% include 'posts/post_card.html' %}
-        {% endfor %}
-    </div>
-{% else %}
-    <h1>There is no post yet</h1>
-{% endif %}
