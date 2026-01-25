@@ -13,7 +13,7 @@ from django.views.generic import DetailView, CreateView
 from .serializers import CommentSerializer, PostSerializer
 from rest_framework import viewsets, permissions
 
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count, Exists, OuterRef, Q
 
 class PostDetailedView(DetailView):
     model = Post
@@ -143,19 +143,45 @@ def delete_post(request, post, id):
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
+        
+        queryset = self._get_base_post_queryset()
+        queryset = self._feed_filter(queryset)
 
-        queryset = Post.objects.select_related('author').annotate(
+        return queryset.order_by('-created_at')   
+    
+    def _get_base_post_queryset(self):
+        user = self.request.user
+        return Post.objects.select_related('author').annotate(
             likes_count=Count('likes', distinct=True), 
-            is_liked=Exists(Like.objects.filter(user=user, post=OuterRef('pk'))
+            is_liked=Exists(Like.objects.filter(
+            user=user, post=OuterRef('pk')
                 )
             )
-        return queryset.order_by('-created_at')   
-
+        )
+    
+    def _feed_filter(self, queryset):
+        filter_type = self.request.query_params.get('mode')
+        
+        if filter_type == 'feed' and self.request.user.is_authenticated:
+            user = self.request.user 
+            user_following_list = user.following_list()
+            return queryset.filter(Q(author__in=user_following_list) | Q(author=user))
+        return queryset
+                                                                                                             
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    queryset = Comment.objects.all()
+
+    def get_queryset(self):
+        post_id = self.request.query_params.get('post_id')
+        queryset = self._get_comments_by_post_queryset()
+        if post_id:
+            queryset = queryset.filter(post__id=post_id)
+        return queryset.order_by('-created_at')
+
+    def _get_comments_by_post_queryset(self):
+        user = self.request.user
+        return Comment.objects.select_related('author').annotate(is_liked=Exists(CommentLike.objects.filter(user=user, comment=OuterRef('pk'))))
+        
