@@ -20,9 +20,14 @@ class CommentSerializer(serializers.ModelSerializer):
     author_avatar = serializers.ImageField(source='author.avatar', read_only=True)
     is_liked = serializers.BooleanField(read_only=True)
     post_id = serializers.ReadOnlyField(source='post.id')
+    tags = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='name'
+    )
 
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'content', 'created_at', 'is_liked', 'post_id', 'author_avatar']
+        fields = ['id', 'author', 'content', 'created_at', 'is_liked', 'post_id', 'author_avatar', 'tag']
 
     
