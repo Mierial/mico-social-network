@@ -17,7 +17,20 @@ class Post(models.Model):
 
     def is_user_post_creator(self, user):
         return self.author == user
-            
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.create_tags()
+    
+    def create_tags(self):
+        if not self.description:
+            return
+        
+        words = self.description.split()
+        hashtags = [word for word in words if word.startswith('#')]
+        for tag_name in hashtags:
+            Tag.objects.get_or_create(name=tag_name, post=self)
+
     class Meta:
         ordering = ['-created_at']
 
@@ -47,4 +60,6 @@ class CommentLike(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='tags', blank=True)
+    post = models.ForeignKey(Post, 
+                             on_delete=models.CASCADE,
+                               related_name='tags', blank=True)
