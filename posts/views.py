@@ -4,13 +4,12 @@ from users.decorators import login_required
 
 from .models import Post, Like, Comment, CommentLike
 from .decorators import post_required
-
-from django.core.paginator import Paginator
-
 from .serializers import CommentSerializer, PostSerializer
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 
 from django.db.models import Count, Exists, OuterRef, Q, BooleanField, Value
+
+from rest_framework.response import Response
 @post_required
 def like_post(request, post, id):
     if request.method == 'POST':
@@ -47,7 +46,7 @@ def delete_post(request, post, id):
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         
@@ -56,14 +55,23 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by('-created_at')   
     
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     def _get_base_post_queryset(self):
         user = self.request.user
-        return Post.objects.select_related('author').annotate(
-            likes_count=Count('likes', distinct=True), 
-            is_liked=Exists(Like.objects.filter(
-            user=user, post=OuterRef('pk')
+        if user.is_authenticated:
+            return Post.objects.select_related('author').annotate(
+                likes_count=Count('likes', distinct=True), 
+                is_liked=Exists(Like.objects.filter(
+                user=user, post=OuterRef('pk')
+                    )
                 )
             )
+
+        return Post.objects.select_related('author').annotate(
+            likes_count=Count('likes', distinct=True),
+            is_liked=Value(False, output_field=BooleanField())
         )
     
     def _feed_filter(self, queryset):
@@ -74,6 +82,14 @@ class PostViewSet(viewsets.ModelViewSet):
             user_following_list = user.following_list()
             return queryset.filter(Q(author__in=user_following_list) | Q(author=user))
         return queryset
+    
+    def destroy(self, request, pk=None):
+        post = self.get_object()
+        if post.is_user_post_creator(request.user):
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
                                                                                                              
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -82,21 +98,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-
     def get_queryset(self):
         post_id = self.request.query_params.get('post_id')
-        if not post_id or not post_id.isdigit():
-            return Comment.objects.none()
-        
         queryset = self._get_comments_by_post_queryset()
-
         if post_id:
-            queryset = queryset.filter(post__id=post_id)
+            queryset = queryset.filter(post__id=post_id)      
         return queryset.order_by('-created_at')
     
     def _get_comments_by_post_queryset(self):
-        user = self.request.user
         queryset = Comment.objects.select_related('author')
+        user = self.request.user
         if user.is_authenticated:
             return queryset.annotate(
                 is_liked=Exists(

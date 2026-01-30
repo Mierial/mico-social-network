@@ -62,4 +62,4 @@ class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
     post = models.ForeignKey(Post, 
                              on_delete=models.CASCADE,
-                               related_name='tags', blank=True)
+                            related_name='tags', blank=True)
