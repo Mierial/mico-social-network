@@ -8,8 +8,8 @@ from rest_framework import routers
 from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
-router.register(r'', views.PostViewSet, basename='post')
 router.register(r'comments', views.CommentViewSet, basename='comment')
+router.register(r'', views.PostViewSet, basename='post')
 
 app_name = 'posts'
 

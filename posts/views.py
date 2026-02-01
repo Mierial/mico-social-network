@@ -10,6 +10,8 @@ from rest_framework import viewsets, permissions, status
 from django.db.models import Count, Exists, OuterRef, Q, BooleanField, Value
 
 from rest_framework.response import Response
+
+from permissions import IsOwnerOrRedaOnly
 @post_required
 def like_post(request, post, id):
     if request.method == 'POST':
@@ -89,7 +91,6 @@ class PostViewSet(viewsets.ModelViewSet):
             post.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_403_FORBIDDEN)
-    
                                                                                                              
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -115,4 +116,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset.annotate(
             is_liked=Value(False, output_field=BooleanField())
         )
-
+    
