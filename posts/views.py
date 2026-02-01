@@ -11,7 +11,6 @@ from django.db.models import Count, Exists, OuterRef, Q, BooleanField, Value
 
 from rest_framework.response import Response
 
-from permissions import IsOwnerOrRedaOnly
 @post_required
 def like_post(request, post, id):
     if request.method == 'POST':

@@ -14,9 +14,6 @@ from django.views.generic import DetailView
 
 from django.shortcuts import get_object_or_404
 
-from .decorators import profile_user_required, login_required
-
-
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST or None)
 
@@ -38,8 +35,7 @@ def register_view(request):
         return redirect('home')
     return render(request, 'users/register_view.html', {'form': form})
 
-@login_required
-@profile_user_required
+
 def profile_view(request, username, profile_user):
     posts = Post.objects.filter(author=profile_user)
 
@@ -73,18 +69,16 @@ def logout_view(request):
         logout(request)
         return redirect('home')
 
-@login_required
-@profile_user_required
 def following(request , username, profile_user):
     if(request.method == 'POST'):
         if not Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
             Follow.objects.create(from_user=request.user, to_user=profile_user)
         return redirect('users:profile', username=profile_user.username)
 
-@login_required
-@profile_user_required
 def unfollowing(request, username, profile_user):
     if(request.method=='POST'):
         if Follow.objects.filter(from_user=request.user, to_user=profile_user).exists():
             Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
         return redirect('users:profile', username=profile_user.username)
+    
+class ProfileDetailView(DetailView):
