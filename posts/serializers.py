@@ -21,15 +21,15 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
 
-    author = serializers.ReadOnlyField(source='author.username')
+    author_username = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.ImageField(source='author.avatar', read_only=True)
     is_liked = serializers.BooleanField(read_only=True)
-    post_id = serializers.ReadOnlyField(source='post.id')
+    post_id = serializers.IntegerField(read_only=True)
     
 
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'content', 'created_at', 'is_liked', 'post_id', 'author_avatar']
+        fields = ['id', 'author_username', 'content', 'created_at', 'is_liked', 'post_id', 'author_avatar']
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:

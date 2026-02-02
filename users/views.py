@@ -1,5 +1,7 @@
 from urllib import request
 from django.shortcuts import render, redirect
+
+from users.serializers import UserSerializer
 from .forms import RegisterForm, EditProfileForm
 
 from django.contrib.auth.forms import AuthenticationForm
@@ -13,6 +15,10 @@ from posts.models import Post
 from django.views.generic import DetailView
 
 from django.shortcuts import get_object_or_404
+
+
+
+from rest_framework import viewsets, permissions
 
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST or None)
@@ -81,4 +87,19 @@ def unfollowing(request, username, profile_user):
             Follow.objects.filter(from_user=request.user, to_user=profile_user).delete()
         return redirect('users:profile', username=profile_user.username)
     
-class ProfileDetailView(DetailView):
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        user = self.request.user
+        queryset = CustomUser.objects.all().annotate(
+            following_count = Count('following', distinct=True),
+            followers_count = Count('followers', distinct=True),
+            post_count = Count('posts', distinct=True),
+            is_followed=Exists(Follow.objects.filter(
+                from_user=user, to_user=OuterRef('pk')
+        )
+        )
+        )
+        return queryset

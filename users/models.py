@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from posts.models import Post
 
 class CustomUser(AbstractUser):
     bio = models.TextField(max_length=250,blank=True, null=True)
@@ -25,6 +25,15 @@ class CustomUser(AbstractUser):
 
     def followers_list(self):
         return CustomUser.objects.filter(following__to_user=self)
+
+    def is_following_to(self, user):
+        return Follow.objects.filter(from_user=user, to_user=self)
+    
+    def is_profile_owner(self, owner):
+        return self == owner
+    
+    def posts_count(self):
+        return Post.objects.filter(author=self).count()  
 
 class Follow(models.Model):
     from_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='following')
