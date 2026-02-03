@@ -11,6 +11,8 @@ from django.db.models import Count, Exists, OuterRef, Q, BooleanField, Value
 
 from rest_framework.response import Response
 
+from .permissions import isOwner, IsOwnerOrReadOnly
+
 @post_required
 def like_post(request, post, id):
     if request.method == 'POST':
@@ -93,7 +95,15 @@ class PostViewSet(viewsets.ModelViewSet):
                                                                                                              
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [permissions.IsAuthenticated]
+        if self.action in ['update', 'partial_update', 'destroy']:
+            permission_classes = [isOwner]
+        else:
+            permission_classes = [permissions.AllowAny]
+        return[permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

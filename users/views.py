@@ -8,7 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from .models import CustomUser, Follow
 
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count, Exists, OuterRef, Value, BooleanField
 
 from posts.models import Post
 
@@ -93,6 +93,10 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return CustomUser.objects.all().annotate(
+                is_followed=Value(False, output_field=BooleanField())
+            )
         queryset = CustomUser.objects.all().annotate(
             following_count = Count('following', distinct=True),
             followers_count = Count('followers', distinct=True),
@@ -103,3 +107,4 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         )
         return queryset
+    
