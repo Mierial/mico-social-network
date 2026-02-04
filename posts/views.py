@@ -126,3 +126,11 @@ class CommentViewSet(viewsets.ModelViewSet):
             is_liked=Value(False, output_field=BooleanField())
         )
     
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAuthenticated, isOwner]
+
+        comment = self.get_object()
+        comment.delete()
+       
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
